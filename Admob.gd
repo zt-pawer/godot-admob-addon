@@ -689,3 +689,18 @@ func _on_consent_info_updated() -> void:
 
 func _on_consent_info_update_failed(error_data: Dictionary) -> void:
 	consent_info_update_failed.emit(FormError.new(error_data))
+
+
+static func get_admob_node(a_node: Node) -> Admob:
+	var __result: Admob
+
+	if a_node is Admob:
+		__result = a_node
+	elif a_node.get_child_count() > 0:
+		for __child in a_node.get_children():
+			var __child_result = get_admob_node(__child)
+			if __child_result is Admob:
+				__result = __child_result
+				break
+
+	return __result 

@@ -37,21 +37,6 @@ func _exit_tree() -> void:
 	ios_export_plugin = null
 
 
-func _get_admob_node(a_node: Node) -> Admob:
-	var __result: Admob
-
-	if a_node is Admob:
-		__result = a_node
-	elif a_node.get_child_count() > 0:
-		for __child in a_node.get_children():
-			var __child_result = _get_admob_node(__child)
-			if __child_result is Admob:
-				__result = __child_result
-				break
-
-	return __result
-
-
 class AndroidExportPlugin extends EditorExportPlugin:
 	const PLUGIN_DEPENDENCIES: Array = [ @pluginDependencies@ ]
 
@@ -80,10 +65,10 @@ class AndroidExportPlugin extends EditorExportPlugin:
 
 
 	func _get_android_manifest_application_element_contents(platform: EditorExportPlatform, debug: bool) -> String:
-		var __admob_node: Admob = _get_admob_node(EditorInterface.get_edited_scene_root())
+		var __admob_node: Admob = Admob.get_admob_node(EditorInterface.get_edited_scene_root())
 		if not __admob_node:
 			var main_scene = load(ProjectSettings.get_setting("application/run/main_scene")).instantiate()
-			__admob_node = _get_admob_node(main_scene)
+			__admob_node = Admob.get_admob_node(main_scene)
 			if not __admob_node:
 				push_error("%s failed to find %s node!" % [PLUGIN_NAME, PLUGIN_NODE_TYPE_NAME])
 
@@ -309,7 +294,7 @@ class IosExportPlugin extends EditorExportPlugin:
 
 
 	func _export_begin(features: PackedStringArray, is_debug: bool, path: String, flags: int) -> void:
-		var __admob_node: Admob = _get_admob_node(EditorInterface.get_edited_scene_root())
+		var __admob_node: Admob = Admob.get_admob_node(EditorInterface.get_edited_scene_root())
 		add_ios_plist_content("<key>GADApplicationIdentifier</key>")
 		add_ios_plist_content("\t<string>%s</string>" % (__admob_node.real_application_id if __admob_node.is_real else __admob_node.debug_application_id))
 
