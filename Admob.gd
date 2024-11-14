@@ -42,6 +42,8 @@ signal consent_form_dismissed(error_data: FormError)
 signal consent_form_failed_to_load(error_data: FormError)
 signal consent_info_updated
 signal consent_info_update_failed(error_data: FormError)
+signal tracking_authorization_granted
+signal tracking_authorization_denied
 
 const PLUGIN_SINGLETON_NAME: String = "@pluginName@"
 
@@ -163,6 +165,8 @@ func _connect_signals() -> void:
 	_plugin_singleton.connect("consent_form_failed_to_load", _on_consent_form_failed_to_load)
 	_plugin_singleton.connect("consent_info_updated", _on_consent_info_updated)
 	_plugin_singleton.connect("consent_info_update_failed", _on_consent_info_update_failed)
+	_plugin_singleton.connect("tracking_authorization_granted", _on_tracking_authorization_granted)
+	_plugin_singleton.connect("tracking_authorization_denied", _on_tracking_authorization_denied)
 
 
 func initialize() -> void:
@@ -273,42 +277,44 @@ func show_banner_ad(a_ad_id: String = "") -> void:
 			else:
 				_plugin_singleton.show_banner_ad(_active_banner_ads[0])	# show last ad to load
 		else:
-			_plugin_singleton.show_banner_ad(a_ad_id)
+			if _active_banner_ads.has(a_ad_id):
+				_plugin_singleton.show_banner_ad(a_ad_id)
+			else:
+				printerr("Cannot show banner. Ad with ID '%s' not found." % a_ad_id)
 
 
-func hide_banner_ad(a_ad_id: String) -> void:
+func hide_banner_ad(a_ad_id: String = "") -> void:
 	if _plugin_singleton == null:
 		printerr("%s plugin not initialized" % PLUGIN_SINGLETON_NAME)
 	else:
-		if _active_banner_ads.has(a_ad_id):
-			_plugin_singleton.hide_banner_ad(a_ad_id)
+		if a_ad_id.is_empty():
+			if _active_banner_ads.is_empty():
+				printerr("Cannot hide banner ad. No banner ads loaded.")
+			else:
+				_plugin_singleton.hide_banner_ad(_active_banner_ads[0])	# hide last ad to load
 		else:
-			printerr("Cannot hide banner. Ad with ID '%s' not found." % a_ad_id)
+			if _active_banner_ads.has(a_ad_id):
+				_plugin_singleton.hide_banner_ad(a_ad_id)
+			else:
+				printerr("Cannot hide banner. Ad with ID '%s' not found." % a_ad_id)
 
 
-func remove_banner_ad(a_ad_id: String) -> void:
+func remove_banner_ad(a_ad_id: String = "") -> void:
 	if _plugin_singleton == null:
 		printerr("%s plugin not initialized" % PLUGIN_SINGLETON_NAME)
 	else:
-		if _active_banner_ads.has(a_ad_id):
-			_active_banner_ads.erase(a_ad_id)
-			_plugin_singleton.remove_banner_ad(a_ad_id)
+		if a_ad_id.is_empty():
+			if _active_banner_ads.is_empty():
+				printerr("Cannot remove banner ad. No banner ads loaded.")
+			else:
+				_plugin_singleton.remove_banner_ad(_active_banner_ads[0])	# remove last ad to load
+				_active_banner_ads.remove_at(0)
 		else:
-			printerr("Cannot remove banner ad. Ad with ID '%s' not found." % a_ad_id)
-
-
-func move_banner_ad(a_ad_id: String, a_position: LoadAdRequest.AdPosition) -> void:
-	if _plugin_singleton != null:
-		_plugin_singleton.move_banner_ad(a_ad_id, LoadAdRequest.AdPosition.keys()[a_position])
-	else:
-		printerr("%s plugin not initialized" % PLUGIN_SINGLETON_NAME)
-
-
-func resize_banner_ad(a_ad_id: String) -> void:
-	if _plugin_singleton != null:
-		_plugin_singleton.resize_banner_ad()
-	else:
-		printerr("%s plugin not initialized" % PLUGIN_SINGLETON_NAME)
+			if _active_banner_ads.has(a_ad_id):
+				_active_banner_ads.erase(a_ad_id)
+				_plugin_singleton.remove_banner_ad(a_ad_id)
+			else:
+				printerr("Cannot remove banner ad. Ad with ID '%s' not found." % a_ad_id)
 
 
 func get_banner_dimension(a_ad_id: String = "") -> Vector2:
@@ -505,7 +511,7 @@ func update_consent_info(consentRequestParameters: ConsentRequestParameters) -> 
 		printerr("%s plugin not initialized" % PLUGIN_SINGLETON_NAME)
 	else:
 		consentRequestParameters.set_is_real(is_real)
-		_plugin_singleton.update_consent_info(consentRequestParameters.get_raw_data(), consentRequestParameters.get_device_ids())
+		_plugin_singleton.update_consent_info(consentRequestParameters.get_raw_data())
 
 
 func reset_consent_info() -> void:
@@ -513,6 +519,20 @@ func reset_consent_info() -> void:
 		printerr("%s plugin not initialized" % PLUGIN_SINGLETON_NAME)
 	else:
 		_plugin_singleton.reset_consent_info()
+
+
+func request_tracking_authorization() -> void:
+	if _plugin_singleton == null:
+		printerr("%s plugin not initialized" % PLUGIN_SINGLETON_NAME)
+	else:
+		_plugin_singleton.request_tracking_authorization()
+
+
+func open_app_settings() -> void:
+	if _plugin_singleton == null:
+		printerr("%s plugin not initialized" % PLUGIN_SINGLETON_NAME)
+	else:
+		_plugin_singleton.open_app_settings()
 
 
 func _on_initialization_completed(status_data: Dictionary) -> void:
@@ -689,6 +709,14 @@ func _on_consent_info_updated() -> void:
 
 func _on_consent_info_update_failed(error_data: Dictionary) -> void:
 	consent_info_update_failed.emit(FormError.new(error_data))
+
+
+func _on_tracking_authorization_granted() -> void:
+	tracking_authorization_granted.emit()
+
+
+func _on_tracking_authorization_denied() -> void:
+	tracking_authorization_denied.emit()
 
 
 static func get_admob_node(a_node: Node) -> Admob:
