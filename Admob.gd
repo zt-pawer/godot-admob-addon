@@ -328,6 +328,9 @@ func get_banner_dimension(a_ad_id: String = "") -> Vector2:
 				var last_loaded_banner_ad_id = _active_banner_ads[0]
 				return Vector2(_plugin_singleton.get_banner_width(last_loaded_banner_ad_id),
 							_plugin_singleton.get_banner_height(last_loaded_banner_ad_id))
+		else:
+			return Vector2(_plugin_singleton.get_banner_width(a_ad_id),
+						_plugin_singleton.get_banner_height(a_ad_id))
 
 	return Vector2.ZERO
 
@@ -343,6 +346,9 @@ func get_banner_dimension_in_pixels(a_ad_id: String = "") -> Vector2:
 				var last_loaded_banner_ad_id = _active_banner_ads[0]
 				return Vector2(_plugin_singleton.get_banner_width_in_pixels(last_loaded_banner_ad_id),
 							_plugin_singleton.get_banner_height_in_pixels(last_loaded_banner_ad_id))
+		else:
+			return Vector2(_plugin_singleton.get_banner_height_in_pixels(a_ad_id),
+						_plugin_singleton.get_banner_height_in_pixels(a_ad_id))
 
 	return Vector2.ZERO
 
