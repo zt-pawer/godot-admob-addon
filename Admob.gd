@@ -165,8 +165,10 @@ func _connect_signals() -> void:
 	_plugin_singleton.connect("consent_form_failed_to_load", _on_consent_form_failed_to_load)
 	_plugin_singleton.connect("consent_info_updated", _on_consent_info_updated)
 	_plugin_singleton.connect("consent_info_update_failed", _on_consent_info_update_failed)
-	_plugin_singleton.connect("tracking_authorization_granted", _on_tracking_authorization_granted)
-	_plugin_singleton.connect("tracking_authorization_denied", _on_tracking_authorization_denied)
+	if _plugin_singleton.has_signal("tracking_authorization_granted"):
+		_plugin_singleton.connect("tracking_authorization_granted", _on_tracking_authorization_granted)
+	if _plugin_singleton.has_signal("tracking_authorization_denied"):
+		_plugin_singleton.connect("tracking_authorization_denied", _on_tracking_authorization_denied)
 
 
 func initialize() -> void:
@@ -531,14 +533,20 @@ func request_tracking_authorization() -> void:
 	if _plugin_singleton == null:
 		printerr("%s plugin not initialized" % PLUGIN_SINGLETON_NAME)
 	else:
-		_plugin_singleton.request_tracking_authorization()
+		if _plugin_singleton.has_method("request_tracking_authorization"):
+			_plugin_singleton.request_tracking_authorization()
+		else:
+			printerr("request_tracking_authorization() method is not supported")
 
 
 func open_app_settings() -> void:
 	if _plugin_singleton == null:
 		printerr("%s plugin not initialized" % PLUGIN_SINGLETON_NAME)
 	else:
-		_plugin_singleton.open_app_settings()
+		if _plugin_singleton.has_method("open_app_settings"):
+			_plugin_singleton.open_app_settings()
+		else:
+			printerr("open_app_settings() method is not supported")
 
 
 func _on_initialization_completed(status_data: Dictionary) -> void:
