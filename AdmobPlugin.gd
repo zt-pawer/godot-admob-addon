@@ -62,6 +62,7 @@ class AndroidExportPlugin extends EditorExportPlugin:
 
 	func _export_begin(features: PackedStringArray, is_debug: bool, path: String, flags: int) -> void:
 		_export_config = AdmobExportConfig.new()
+		_export_config.platform = Constants.Platform.ANDROID
 		if not _export_config.export_config_file_exists() or _export_config.load_export_config_from_file() != OK:
 			_export_config.load_export_config_from_node()
 
@@ -294,6 +295,7 @@ class IosExportPlugin extends EditorExportPlugin:
 
 	func _export_begin(features: PackedStringArray, is_debug: bool, path: String, flags: int) -> void:
 		var __export_config = AdmobExportConfig.new()
+		_export_config.platform = Constants.Platform.APPLE
 		if not __export_config.export_config_file_exists() or __export_config.load_export_config_from_file() != OK:
 			__export_config.load_export_config_from_node()
 

@@ -48,7 +48,6 @@ signal tracking_authorization_denied
 const PLUGIN_SINGLETON_NAME: String = "@pluginName@"
 
 @export_category("General")
-@export var is_real: bool: set = set_is_real
 @export var max_ad_content_rating: AdmobConfig.ContentRating = AdmobConfig.ContentRating.G: set = set_max_ad_content_rating
 @export var child_directed: AdmobConfig.TagForChildDirectedTreatment = AdmobConfig.TagForChildDirectedTreatment.UNSPECIFIED: set = set_child_directed
 @export var under_age_of_consent: AdmobConfig.TagForUnderAgeOfConsent = AdmobConfig.TagForUnderAgeOfConsent.UNSPECIFIED: set = set_under_age_of_consent
@@ -89,10 +88,10 @@ const PLUGIN_SINGLETON_NAME: String = "@pluginName@"
 @export_range(1,100) var max_rewarded_ad_cache: int = 1: set = set_max_rewarded_ad_cache
 @export_range(1,100) var max_rewarded_interstitial_ad_cache: int = 1: set = set_max_rewarded_interstitial_ad_cache
 
-@onready var _banner_id: String = real_banner_id if is_real else debug_banner_id
-@onready var _interstitial_id: String = real_interstitial_id if is_real else debug_interstitial_id
-@onready var _rewarded_id: String = real_rewarded_id if is_real else debug_rewarded_id
-@onready var _rewarded_interstitial_id: String = real_rewarded_interstitial_id if is_real else debug_rewarded_interstitial_id
+@onready var _banner_id: String = real_banner_id if Constants.RELEASE else debug_banner_id
+@onready var _interstitial_id: String = real_interstitial_id if Constants.RELEASE else debug_interstitial_id
+@onready var _rewarded_id: String = real_rewarded_id if Constants.RELEASE else debug_rewarded_id
+@onready var _rewarded_interstitial_id: String = real_rewarded_interstitial_id if Constants.RELEASE else debug_rewarded_interstitial_id
 
 var _plugin_singleton: Object
 
@@ -178,10 +177,6 @@ func initialize() -> void:
 		_plugin_singleton.initialize()
 
 
-func set_is_real(a_value: bool) -> void:
-	is_real = a_value
-
-
 func set_max_ad_content_rating(a_value: AdmobConfig.ContentRating) -> void:
 	max_ad_content_rating = a_value
 
@@ -237,7 +232,7 @@ func set_max_rewarded_interstitial_ad_cache(a_value: int) -> void:
 func configure_ads() -> void:
 	if _plugin_singleton != null:
 		_plugin_singleton.set_request_configuration(AdmobConfig.new()
-					.set_is_real(is_real)
+					.set_is_real(Constants.RELEASE)
 					.set_max_ad_content_rating(max_ad_content_rating)
 					.set_child_directed_treatment(child_directed)
 					.set_under_age_of_consent(under_age_of_consent)
@@ -518,7 +513,7 @@ func update_consent_info(consentRequestParameters: ConsentRequestParameters) -> 
 	if _plugin_singleton == null:
 		printerr("%s plugin not initialized" % PLUGIN_SINGLETON_NAME)
 	else:
-		consentRequestParameters.set_is_real(is_real)
+		consentRequestParameters.set_is_real(Constants.RELEASE)
 		_plugin_singleton.update_consent_info(consentRequestParameters.get_raw_data())
 
 

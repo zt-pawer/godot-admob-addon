@@ -3,7 +3,8 @@ class_name AdmobExportConfig extends RefCounted
 const PLUGIN_NODE_TYPE_NAME = "@pluginNodeName@"
 const PLUGIN_NAME: String = "@pluginName@"
 
-const CONFIG_FILE_PATH: String = "res://addons/" + PLUGIN_NAME + "/export.cfg"
+const CONFIG_FILE_PATH_IOS: String = "res://addons/" + PLUGIN_NAME + "/export-ios.cfg"
+const CONFIG_FILE_PATH_ANDROID: String = "res://addons/" + PLUGIN_NAME + "/export-android.cfg"
 
 const CONFIG_FILE_SECTION_GENERAL: String = "General"
 const CONFIG_FILE_SECTION_DEBUG: String = "Debug"
@@ -21,9 +22,15 @@ var real_application_id: String
 var att_enabled: bool
 var att_text: String
 
+var platform: Constants.Platform = Constants.Platform.APPLE
+
+
+func _get_path() -> String:
+	return CONFIG_FILE_PATH_IOS if platform==Constants.Platform.APPLE else CONFIG_FILE_PATH_ANDROID
+
 
 func export_config_file_exists() -> bool:
-	return FileAccess.file_exists(CONFIG_FILE_PATH)
+	return FileAccess.file_exists(_get_path())
 
 
 func load_export_config_from_file() -> Error:
@@ -33,7 +40,7 @@ func load_export_config_from_file() -> Error:
 
 	var __config_file = ConfigFile.new()
 
-	var __load_result = __config_file.load(CONFIG_FILE_PATH)
+	var __load_result = __config_file.load(_get_path())
 	if __load_result == Error.OK:
 		is_real = __config_file.get_value(CONFIG_FILE_SECTION_GENERAL, CONFIG_FILE_KEY_IS_REAL)
 		debug_application_id = __config_file.get_value(CONFIG_FILE_SECTION_DEBUG, CONFIG_FILE_KEY_APP_ID)
@@ -43,7 +50,7 @@ func load_export_config_from_file() -> Error:
 
 		if is_real == null or debug_application_id == null or real_application_id == null:
 			__result == Error.ERR_INVALID_DATA
-			push_error("Invalid export config file %s!" % CONFIG_FILE_PATH)
+			push_error("Invalid export config file %s!" % _get_path())
 	else:
 		__result = Error.ERR_CANT_OPEN
 		push_error("Failed to open export config file %s!" % CONFIG_FILE_PATH)
