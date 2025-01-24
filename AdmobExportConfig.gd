@@ -42,7 +42,7 @@ func load_export_config_from_file() -> Error:
 
 	var __load_result = __config_file.load(_get_path())
 	if __load_result == Error.OK:
-		is_real = __config_file.get_value(CONFIG_FILE_SECTION_GENERAL, CONFIG_FILE_KEY_IS_REAL)
+		is_real = Constants.RELEASE
 		debug_application_id = __config_file.get_value(CONFIG_FILE_SECTION_DEBUG, CONFIG_FILE_KEY_APP_ID)
 		real_application_id = __config_file.get_value(CONFIG_FILE_SECTION_RELEASE, CONFIG_FILE_KEY_APP_ID)
 		att_enabled = __config_file.get_value(CONFIG_FILE_SECTION_ATT, CONFIG_FILE_KEY_ATT_ENABLED, false)
